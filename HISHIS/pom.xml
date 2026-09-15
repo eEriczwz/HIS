@@ -16,6 +16,8 @@
         <module>his-common</module>
         <module>his-outpatient</module>
         <module>his-drugstore</module>
+        <module>his-registration</module>
+        <module>his-employee</module>
     </modules>
 
     <parent>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.mapper.DrugInfoMapper">
+
+    <select id="list" resultType="com.neuedu.entity.DrugInfo">
+        select * from drug_info
+        where delmark = 1
+        <if test="drugCode != null and drugCode != ''">
+            and drug_code like concat('%',#{drugCode},'%')
+        </if>
+        <if test="drugName != null and drugName != ''">
+            and drug_name like concat('%',#{drugName},'%')
+        </if>
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        insert into drug_info(drug_code,drug_name,drug_format,drug_unit,manufacturer,
+        drug_dosage,drug_type,drug_price,mnemonic_code,creation_date,delmark)
+        values(#{drugCode},#{drugName},#{drugFormat},#{drugUnit},#{manufacturer},
+        #{drugDosage},#{drugType},#{drugPrice},#{mnemonicCode},#{creationDate},1)
+    </insert>
+
+    <update id="update">
+        update drug_info set
+        drug_code=#{drugCode},
+        drug_name=#{drugName},
+        drug_format=#{drugFormat},
+        drug_unit=#{drugUnit},
+        manufacturer=#{manufacturer},
+        drug_dosage=#{drugDosage},
+        drug_type=#{drugType},
+        drug_price=#{drugPrice},
+        mnemonic_code=#{mnemonicCode},
+        creation_date=#{creationDate}
+        where id=#{id}
+    </update>
+
+    <update id="deleteById">
+        update drug_info set delmark=0 where id=#{id}
+    </update>
+</mapper>

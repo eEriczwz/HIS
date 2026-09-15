@@ -22,6 +22,16 @@ public class Result<T> {
         return r;
     }
 
+    // 成功：自定义提示 + 返回数据
+    public static <T> Result<T> success(String msg, T data){
+        Result<T> r = new Result<>();
+        r.setCode(200);
+        r.setMsg(msg);
+        r.setData(data);
+        return r;
+    }
+
+
     // 失败方法，就是你缺失的
     public static <T> Result<T> error(String msg){
         Result<T> r = new Result<>();

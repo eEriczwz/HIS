@@ -8,6 +8,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="his-common" />
         <module name="his-outpatient" />
+        <module name="his-employee" />
+        <module name="his-registration" />
         <module name="his-drugstore" />
       </profile>
     </annotationProcessing>
@@ -16,7 +18,9 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="his-common" options="-parameters" />
       <module name="his-drugstore" options="-parameters" />
+      <module name="his-employee" options="-parameters" />
       <module name="his-outpatient" options="-parameters" />
+      <module name="his-registration" options="-parameters" />
     </option>
   </component>
 </project>
