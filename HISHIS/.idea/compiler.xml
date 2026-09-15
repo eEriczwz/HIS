@@ -6,10 +6,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="his-common" />
-        <module name="his-outpatient" />
-        <module name="his-employee" />
         <module name="his-registration" />
+      </profile>
+      <profile name="Annotation profile for hismodules" enabled="true">
+        <sourceOutputDir name="../../target/generated-sources/annotations" />
+        <sourceTestOutputDir name="../../target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="his-common" />
+        <module name="his-employee" />
+        <module name="his-outpatient" />
         <module name="his-drugstore" />
       </profile>
     </annotationProcessing>

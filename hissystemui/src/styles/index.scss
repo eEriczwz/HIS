@@ -1,0 +1,13 @@
+@use './variables.sass' as *;
+
+// 全局通用布局样式
+.app-container {
+  padding: 16px;
+}
+
+.page-header {
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
