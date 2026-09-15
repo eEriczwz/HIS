@@ -2,25 +2,24 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh } from '@element-plus/icons-vue'
-import { getDeptList, addDept, deleteDept, updateDept } from '@/api/department'
+import { getDeptList, addDept, deleteDept } from '@/api/department'
 
 const loading = ref(false)
 const list = ref([])
 const keyword = ref('')
 
 const dialogVisible = ref(false)
-const dialogTitle = ref('新增部门')
 const formRef = ref()
 const submitting = ref(false)
 
 const form = reactive({
-  id: null,
   deptCode: '',
   deptName: '',
   deptType: '',
 })
 
-const deptTypeOptions = ['门诊', '住院', '医技', '行政', '后勤']
+// 科室类型与数据库 department.dept_type 一致（门诊/检查/检验/处置 + 支撑类科室）
+const deptTypeOptions = ['门诊', '检查', '检验', '处置', '药房', '设备', '财务', '防疫']
 
 const rules = {
   deptCode: [{ required: true, message: '请输入部门编码', trigger: 'blur' }],
@@ -49,19 +48,7 @@ async function fetchList() {
 }
 
 function openAdd() {
-  dialogTitle.value = '新增部门'
-  Object.assign(form, { id: null, deptCode: '', deptName: '', deptType: '' })
-  dialogVisible.value = true
-}
-
-function openEdit(row) {
-  dialogTitle.value = '编辑部门'
-  Object.assign(form, {
-    id: row.id,
-    deptCode: row.deptCode,
-    deptName: row.deptName,
-    deptType: row.deptType,
-  })
+  Object.assign(form, { deptCode: '', deptName: '', deptType: '' })
   dialogVisible.value = true
 }
 
@@ -69,17 +56,12 @@ async function handleSubmit() {
   await formRef.value.validate()
   submitting.value = true
   try {
-    if (form.id) {
-      await updateDept({ ...form })
-      ElMessage.success('修改成功')
-    } else {
-      await addDept({
-        deptCode: form.deptCode,
-        deptName: form.deptName,
-        deptType: form.deptType,
-      })
-      ElMessage.success('新增成功')
-    }
+    await addDept({
+      deptCode: form.deptCode,
+      deptName: form.deptName,
+      deptType: form.deptType,
+    })
+    ElMessage.success('新增成功')
     dialogVisible.value = false
     fetchList()
   } catch (e) {
@@ -124,14 +106,13 @@ onMounted(fetchList)
         <el-table-column prop="deptType" label="部门类型" width="120" />
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px">
+    <el-dialog v-model="dialogVisible" title="新增部门" width="480px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
         <el-form-item label="部门编码" prop="deptCode">
           <el-input v-model="form.deptCode" placeholder="如 TEST001" />

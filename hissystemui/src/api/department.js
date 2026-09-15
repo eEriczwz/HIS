@@ -14,8 +14,3 @@ export function addDept(data) {
 export function deleteDept(id) {
   return request.delete(`/department/del/${id}`)
 }
-
-// 编辑部门 —— 接口文档未提供，请确认后端路径后修改
-export function updateDept(data) {
-  return request.put('/department/update', data)
-}

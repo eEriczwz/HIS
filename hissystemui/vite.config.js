@@ -20,10 +20,10 @@ export default defineConfig({
     proxy: {
       // 前端请求 /api/** 会代理到后端 Spring Boot 服务
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8092',
         changeOrigin: true,
-        // 如果后端接口本身不带 /api 前缀，打开下面这行去掉前缀
-        // rewrite: (path) => path.replace(/^\/api/, ''),
+        // 后端接口本身不带 /api 前缀，这里把 /api 剥掉再转发
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
