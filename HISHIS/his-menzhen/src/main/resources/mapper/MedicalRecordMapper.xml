@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.outpatient.mapper.MedicalRecordMapper">
+    <resultMap id="BaseResultMap" type="com.neuedu.outpatient.entity.MedicalRecord">
+        <id column="id" property="id"/>
+        <result column="register_id" property="registerId"/>
+        <result column="readme" property="readme"/>
+        <result column="present" property="present"/>
+        <result column="present_treat" property="presentTreat"/>
+        <result column="history" property="history"/>
+        <result column="allergy" property="allergy"/>
+        <result column="physique" property="physique"/>
+        <result column="proposal" property="proposal"/>
+        <result column="careful" property="careful"/>
+        <result column="diagnosis" property="diagnosis"/>
+        <result column="cure" property="cure"/>
+    </resultMap>
+
+    <select id="selectByRegisterId" resultMap="BaseResultMap">
+        SELECT * FROM medical_record WHERE register_id = #{registerId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO medical_record(register_id,readme,present,present_treat,history,allergy,physique,proposal,careful,diagnosis,cure)
+        VALUES(#{registerId},#{readme},#{present},#{presentTreat},#{history},#{allergy},#{physique},#{proposal},#{careful},#{diagnosis},#{cure})
+    </insert>
+
+    <!-- 补全下面这条selectById -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM medical_record WHERE id = #{id}
+    </select>
+</mapper>
