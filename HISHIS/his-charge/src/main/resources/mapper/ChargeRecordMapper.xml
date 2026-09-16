@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.charge.mapper.ChargeRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.neuedu.charge.entity.ChargeRecord">
+        <id column="id" property="id"/>
+        <result column="register_id" property="registerId"/>
+        <result column="case_number" property="caseNumber"/>
+        <result column="real_name" property="realName"/>
+        <result column="regist_fee" property="registFee"/>
+        <result column="drug_total_fee" property="drugTotalFee"/>
+        <result column="check_total_fee" property="checkTotalFee"/>
+        <result column="inspection_total_fee" property="inspectionTotalFee"/>
+        <result column="disposal_total_fee" property="disposalTotalFee"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="charge_state" property="chargeState"/>
+        <result column="charge_time" property="chargeTime"/>
+        <result column="refund_time" property="refundTime"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO charge_record
+            (register_id, case_number, real_name, regist_fee, drug_total_fee,
+             check_total_fee, inspection_total_fee, disposal_total_fee,
+             total_amount, charge_state, charge_time)
+        VALUES
+            (#{registerId}, #{caseNumber}, #{realName}, #{registFee}, #{drugTotalFee},
+             #{checkTotalFee}, #{inspectionTotalFee}, #{disposalTotalFee},
+             #{totalAmount}, #{chargeState}, #{chargeTime})
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM charge_record WHERE id = #{id}
+    </select>
+
+    <select id="selectByRegisterIdAndState" resultMap="BaseResultMap">
+        SELECT * FROM charge_record
+        WHERE register_id = #{registerId} AND charge_state = #{chargeState}
+        LIMIT 1
+    </select>
+
+    <select id="selectChargedList" resultMap="BaseResultMap">
+        SELECT * FROM charge_record
+        <where>
+            <if test="caseNumber != null and caseNumber != ''">
+                AND case_number = #{caseNumber}
+            </if>
+            <if test="realName != null and realName != ''">
+                AND real_name LIKE CONCAT('%', #{realName}, '%')
+            </if>
+        </where>
+        ORDER BY charge_time DESC, id DESC
+    </select>
+
+    <update id="updateToRefunded">
+        UPDATE charge_record
+        SET charge_state = '已退费', refund_time = NOW()
+        WHERE id = #{id} AND charge_state = '已收费'
+    </update>
+
+</mapper>

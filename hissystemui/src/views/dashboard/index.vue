@@ -16,7 +16,7 @@ const stats = [
   <div class="dashboard">
     <el-card class="welcome-card" shadow="never">
       <h2>你好，{{ userStore.userInfo?.name || '管理员' }} 👋</h2>
-      <p>欢迎使用 HIS 医院信息管理系统</p>
+      <p>欢迎使用长沙市中心人民医院信息管理系统</p>
     </el-card>
 
     <el-row :gutter="16" class="stat-row">

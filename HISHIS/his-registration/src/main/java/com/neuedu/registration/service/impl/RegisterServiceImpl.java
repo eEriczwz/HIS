@@ -7,8 +7,6 @@ import com.neuedu.registration.mapper.RegisterMapper;
 import com.neuedu.registration.service.RegisterService;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -19,9 +17,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public String createRegister(RegisterDTO dto) {
         Register reg = new Register();
-        //生成病历/挂号单号
-        String caseNumber = "REG" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        reg.setCaseNumber(caseNumber);
+        // 病历号在拿到数据库自增 id 后再生成，先不赋值（case_number 允许为 null）
         reg.setRealName(dto.getRealName());
         reg.setGender(dto.getGender());
         reg.setCardNumber(dto.getCardNumber());
@@ -38,8 +34,15 @@ public class RegisterServiceImpl implements RegisterService {
         reg.setIsBook(dto.getIsBook());
         reg.setRegistMethod(dto.getRegistMethod());
         reg.setRegistMoney(dto.getRegistMoney());
-        reg.setVisitState(0); //0=未就诊（新建挂号默认）
-        registerMapper.insert(reg);
+        reg.setVisitState(1); //1=已挂号（新建挂号默认）
+        registerMapper.insert(reg); // useGeneratedKeys 回填 reg.id
+
+        // 病历号 = 当前最大病历号 + 1，保证连续（首单从 1000001 开始）
+        Integer id = reg.getId();
+        int maxCase = registerMapper.selectMaxCaseNumber();
+        int base = maxCase > 0 ? maxCase : 1000000;
+        String caseNumber = String.valueOf(base + 1);
+        registerMapper.updateCaseNumber(id, caseNumber);
         return caseNumber;
     }
 

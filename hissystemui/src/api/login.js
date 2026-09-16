@@ -1,8 +1,8 @@
 import request from './request'
 
-// 登录相关接口 —— 请按后端实际路径调整
+// 登录接口 —— 后端在 employee 服务（8094）：POST /employee/login，body 为 { realname, password }
 export function login(data) {
-  return request.post('/auth/login', data)
+  return request.post('/employee/login', data)
 }
 
 export function getUserInfo() {

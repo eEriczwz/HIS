@@ -16,6 +16,7 @@
         <module>his-registration</module>
         <module>his-employee</module>
         <module>his-menzhen</module>
+        <module>his-charge</module>
     </modules>
 
     <parent>

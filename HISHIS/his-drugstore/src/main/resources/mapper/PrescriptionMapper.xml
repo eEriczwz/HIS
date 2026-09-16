@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.mapper.PrescriptionMapper">
+    <resultMap id="BaseResultMap" type="com.neuedu.entity.Prescription">
+        <id column="id" property="id"/>
+        <result column="register_id" property="registerId"/>
+        <result column="drug_id" property="drugId"/>
+        <result column="drug_usage" property="drugUsage"/>
+        <result column="drug_number" property="drugNumber"/>
+        <result column="creation_time" property="creationTime"/>
+        <result column="drug_state" property="drugState"/>
+        <result column="drug_name" property="drugName"/>
+        <result column="drug_format" property="drugFormat"/>
+        <result column="drug_unit" property="drugUnit"/>
+        <result column="drug_price" property="drugPrice"/>
+        <result column="real_name" property="realName"/>
+        <result column="case_number" property="caseNumber"/>
+    </resultMap>
+
+    <select id="selectForDispense" resultMap="BaseResultMap">
+        SELECT p.*, d.drug_name, d.drug_format, d.drug_unit, d.drug_price,
+               r.real_name, r.case_number
+        FROM prescription p
+        LEFT JOIN drug_info d ON p.drug_id = d.id
+        LEFT JOIN register r ON p.register_id = r.id
+        <where>
+            <if test="state != null and state != ''">
+                <choose>
+                    <when test="state == 'pending'">
+                        p.drug_state IN ('已开立','已缴费')
+                    </when>
+                    <otherwise>
+                        p.drug_state = #{state}
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="caseNumber != null and caseNumber != ''">
+                AND r.case_number = #{caseNumber}
+            </if>
+            <if test="drugName != null and drugName != ''">
+                AND d.drug_name LIKE CONCAT('%', #{drugName}, '%')
+            </if>
+        </where>
+        ORDER BY p.creation_time DESC, p.id DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM prescription WHERE id = #{id}
+    </select>
+
+    <update id="issue">
+        UPDATE prescription SET drug_state = '已发药'
+        WHERE id = #{id} AND drug_state IN ('已开立','已缴费')
+    </update>
+
+    <update id="returnDrug">
+        UPDATE prescription SET drug_state = '已退药'
+        WHERE id = #{id} AND drug_state = '已发药'
+    </update>
+</mapper>

@@ -9,6 +9,10 @@
         <result column="drug_number" property="drugNumber"/>
         <result column="creation_time" property="creationTime"/>
         <result column="drug_state" property="drugState"/>
+        <result column="drug_name" property="drugName"/>
+        <result column="drug_format" property="drugFormat"/>
+        <result column="drug_unit" property="drugUnit"/>
+        <result column="drug_price" property="drugPrice"/>
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -17,7 +21,10 @@
     </insert>
 
     <select id="selectByRegisterId" resultMap="BaseResultMap">
-        SELECT * FROM prescription WHERE register_id = #{registerId}
+        SELECT p.*, d.drug_name, d.drug_format, d.drug_unit, d.drug_price
+        FROM prescription p
+        LEFT JOIN drug_info d ON p.drug_id = d.id
+        WHERE p.register_id = #{registerId}
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">

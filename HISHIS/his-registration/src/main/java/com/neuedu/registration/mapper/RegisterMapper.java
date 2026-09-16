@@ -14,4 +14,8 @@ public interface RegisterMapper {
     Register selectById(Integer id);
     //修改就诊状态 visitState
     int updateVisitState(@Param("id")Integer id,@Param("visitState")Integer visitState);
+    //插入后回填病历号（基于自增 id 生成）
+    int updateCaseNumber(@Param("id")Integer id,@Param("caseNumber")String caseNumber);
+    //查询当前最大病历号（数字），用于生成连续病历号
+    Integer selectMaxCaseNumber();
 }

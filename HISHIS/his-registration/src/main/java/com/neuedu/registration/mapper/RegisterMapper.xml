@@ -39,4 +39,12 @@
     <update id="updateVisitState">
         UPDATE register SET visit_state=#{visitState} WHERE id=#{id}
     </update>
+
+    <update id="updateCaseNumber">
+        UPDATE register SET case_number=#{caseNumber} WHERE id=#{id}
+    </update>
+
+    <select id="selectMaxCaseNumber" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(CAST(case_number AS UNSIGNED)), 0) FROM register
+    </select>
 </mapper>

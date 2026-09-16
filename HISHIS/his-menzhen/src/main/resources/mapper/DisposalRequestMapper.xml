@@ -14,6 +14,7 @@
         <result column="disposal_result" property="disposalResult"/>
         <result column="disposal_state" property="disposalState"/>
         <result column="disposal_remark" property="disposalRemark"/>
+        <result column="tech_name" property="techName"/>
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -22,7 +23,10 @@
     </insert>
 
     <select id="selectByRegisterId" resultMap="BaseResultMap">
-        SELECT * FROM disposal_request WHERE register_id = #{registerId}
+        SELECT d.*, t.tech_name
+        FROM disposal_request d
+        LEFT JOIN medical_technology t ON d.medical_technology_id = t.id
+        WHERE d.register_id = #{registerId}
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">

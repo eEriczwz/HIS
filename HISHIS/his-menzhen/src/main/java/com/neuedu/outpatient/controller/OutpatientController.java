@@ -8,8 +8,12 @@ import com.neuedu.outpatient.entity.Register;
 import com.neuedu.outpatient.entity.CheckRequest;
 import com.neuedu.outpatient.entity.DisposalRequest;
 import com.neuedu.outpatient.entity.Prescription;
+import com.neuedu.outpatient.entity.Disease;
+import com.neuedu.outpatient.entity.MedicalTechnology;
 import com.neuedu.outpatient.vo.MedicalRecordVO;
 import com.neuedu.outpatient.mapper.MedicalRecordDiseaseMapper;
+import com.neuedu.outpatient.mapper.DiseaseMapper;
+import com.neuedu.outpatient.mapper.MedicalTechnologyMapper;
 import com.neuedu.outpatient.service.MedicalRecordService;
 import com.neuedu.outpatient.service.RegisterService;
 import com.neuedu.outpatient.service.CheckRequestService;
@@ -48,6 +52,12 @@ public class OutpatientController {
 
     @Resource
     private PrescriptionService prescriptionService;
+
+    @Resource
+    private DiseaseMapper diseaseMapper;
+
+    @Resource
+    private MedicalTechnologyMapper medicalTechnologyMapper;
 
 
 
@@ -149,6 +159,9 @@ public class OutpatientController {
         //开立时间：当前时间
         prescription.setCreationTime(new Date());
         int rows = prescriptionService.addPrescription(prescription);
+        if (rows < 0) {
+            return Result.error("库存不足，无法开立该药品");
+        }
         return rows>0 ? Result.success("处方开立成功，药房可查看") : Result.error("处方开立失败");
     }
 
@@ -169,6 +182,18 @@ public class OutpatientController {
         return Result.success(vo);
     }
 
+    // 疾病字典：按名称/编码/ICD 模糊查询（用于病历诊断多选）
+    @GetMapping("/diseases")
+    public Result<List<Disease>> listDiseases(@RequestParam(required = false) String keyword){
+        return Result.success(diseaseMapper.selectByKeyword(keyword));
+    }
 
+    // 医技项目字典：按类型（检查/检验/处置）+ 名称模糊查询（用于检查/处置申请单）
+    @GetMapping("/medicalTechnologies")
+    public Result<List<MedicalTechnology>> listMedicalTechnologies(
+            @RequestParam(required = false) String techType,
+            @RequestParam(required = false) String keyword){
+        return Result.success(medicalTechnologyMapper.selectByType(techType, keyword));
+    }
 
 }

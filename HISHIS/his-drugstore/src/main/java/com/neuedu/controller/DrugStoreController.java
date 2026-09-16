@@ -54,4 +54,18 @@ public class DrugStoreController {
             return Result.error("删除药品失败");
         }
     }
+
+    //入库：增加库存
+    @PutMapping("/stockIn/{id}/{qty}")
+    public Result stockIn(@PathVariable Integer id, @PathVariable Integer qty){
+        int rows = drugInfoService.stockIn(id, qty);
+        return rows>0 ? Result.success("入库成功") : Result.error("入库失败");
+    }
+
+    //出库：减少库存（库存不足返回错误）
+    @PutMapping("/stockOut/{id}/{qty}")
+    public Result stockOut(@PathVariable Integer id, @PathVariable Integer qty){
+        int rows = drugInfoService.stockOut(id, qty);
+        return rows>0 ? Result.success("出库成功") : Result.error("库存不足或出库失败");
+    }
 }

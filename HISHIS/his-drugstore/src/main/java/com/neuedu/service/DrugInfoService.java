@@ -8,4 +8,6 @@ public interface DrugInfoService {
     int add(DrugInfo drugInfo);
     int update(DrugInfo drugInfo);
     int deleteById(Integer id);
+    int stockIn(Integer id, Integer qty);
+    int stockOut(Integer id, Integer qty);
 }

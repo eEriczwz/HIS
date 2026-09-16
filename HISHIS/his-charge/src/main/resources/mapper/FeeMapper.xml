@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.charge.mapper.FeeMapper">
+
+    <!--
+      根据挂号id计算费用明细（挂号单不存在时无结果返回）。
+      费用口径：
+        registFee           = register.regist_money（挂号费）
+        drugTotalFee        = 处方 × 药品单价（排除已退费/已退药/已作废）
+        checkTotalFee       = 检验申请单（inspection_request）单价合计，排除已退费/已作废
+        inspectionTotalFee  = 检查申请单（check_request）单价合计，排除已退费/已作废
+        disposalTotalFee    = 处置申请单（disposal_request）单价合计，排除已退费/已作废
+    -->
+    <select id="calcFee" resultType="com.neuedu.charge.dto.FeeDetailDTO">
+        SELECT
+            r.id AS registerId,
+            r.regist_money AS registFee,
+            r.case_number AS caseNumber,
+            r.real_name AS realName,
+            IFNULL((
+                SELECT SUM(d.drug_price * p.drug_number)
+                FROM prescription p
+                JOIN drug_info d ON p.drug_id = d.id
+                WHERE p.register_id = r.id
+                  AND p.drug_state NOT IN ('已退费','已退药','已作废')
+            ), 0) AS drugTotalFee,
+            IFNULL((
+                SELECT SUM(t.tech_price)
+                FROM inspection_request i
+                JOIN medical_technology t ON i.medical_technology_id = t.id
+                WHERE i.register_id = r.id
+                  AND i.inspection_state NOT IN ('已退费','已作废')
+            ), 0) AS checkTotalFee,
+            IFNULL((
+                SELECT SUM(t.tech_price)
+                FROM check_request c
+                JOIN medical_technology t ON c.medical_technology_id = t.id
+                WHERE c.register_id = r.id
+                  AND c.check_state NOT IN ('已退费','已作废')
+            ), 0) AS inspectionTotalFee,
+            IFNULL((
+                SELECT SUM(t.tech_price)
+                FROM disposal_request dp
+                JOIN medical_technology t ON dp.medical_technology_id = t.id
+                WHERE dp.register_id = r.id
+                  AND dp.disposal_state NOT IN ('已退费','已作废')
+            ), 0) AS disposalTotalFee
+        FROM register r
+        WHERE r.id = #{key} OR r.case_number = #{key}
+        LIMIT 1
+    </select>
+
+    <!-- 收费：处方「已开立」→「已缴费」 -->
+    <update id="markPrescriptionPaid">
+        UPDATE prescription
+        SET drug_state = '已缴费'
+        WHERE register_id = #{registerId} AND drug_state = '已开立'
+    </update>
+
+    <!-- 收费：检查申请单「待检查」→「已缴费」 -->
+    <update id="markCheckPaid">
+        UPDATE check_request
+        SET check_state = '已缴费'
+        WHERE register_id = #{registerId} AND check_state = '待检查'
+    </update>
+
+    <!-- 收费：检验申请单「已开立/待检查」→「已缴费」 -->
+    <update id="markInspectionPaid">
+        UPDATE inspection_request
+        SET inspection_state = '已缴费'
+        WHERE register_id = #{registerId} AND inspection_state IN ('已开立','待检查')
+    </update>
+
+    <!-- 收费：处置申请单「待处置」→「已缴费」 -->
+    <update id="markDisposalPaid">
+        UPDATE disposal_request
+        SET disposal_state = '已缴费'
+        WHERE register_id = #{registerId} AND disposal_state = '待处置'
+    </update>
+
+</mapper>

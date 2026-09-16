@@ -36342,3 +36342,8 @@ CREATE TABLE `settle_category` (
 -- ----------------------------
 INSERT INTO `settle_category` VALUES ('1', 'js001', '自费', '1', '1');
 INSERT INTO `settle_category` VALUES ('2', 'js002', '市医保', '2', '1');
+
+-- ----------------------------
+-- 药房管理模块：为药品表追加库存列（原表无库存字段，供库存管理/发药使用）
+-- ----------------------------
+ALTER TABLE `drug_info` ADD COLUMN `drug_stock` INT NOT NULL DEFAULT 0 COMMENT '库存数量';

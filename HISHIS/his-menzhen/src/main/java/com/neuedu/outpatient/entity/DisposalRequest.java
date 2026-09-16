@@ -15,6 +15,8 @@ public class DisposalRequest {
     private String disposalResult;
     private String disposalState;
     private String disposalRemark;
+    // 联查展示字段（非表字段）：医技项目名称
+    private String techName;
 
     public Integer getId() {
         return id;
@@ -110,5 +112,13 @@ public class DisposalRequest {
 
     public void setDisposalRemark(String disposalRemark) {
         this.disposalRemark = disposalRemark;
+    }
+
+    public String getTechName() {
+        return techName;
+    }
+
+    public void setTechName(String techName) {
+        this.techName = techName;
     }
 }

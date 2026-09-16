@@ -1,0 +1,14 @@
+server:
+  port: 8096 # 收费管理服务，不与药房(8091)/门诊(8092)/挂号(8093)/员工(8094)/医生工作站(8095)冲突
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/his01?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true

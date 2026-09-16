@@ -4,20 +4,22 @@
 
     <select id="list" resultType="com.neuedu.entity.DrugInfo">
         select * from drug_info
-        where delmark = 1
-        <if test="drugCode != null and drugCode != ''">
-            and drug_code like concat('%',#{drugCode},'%')
-        </if>
-        <if test="drugName != null and drugName != ''">
-            and drug_name like concat('%',#{drugName},'%')
-        </if>
+        <where>
+            <if test="drugCode != null and drugCode != ''">
+                drug_code like concat('%',#{drugCode},'%')
+            </if>
+            <if test="drugName != null and drugName != ''">
+                and drug_name like concat('%',#{drugName},'%')
+            </if>
+        </where>
+        order by id
     </select>
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id">
         insert into drug_info(drug_code,drug_name,drug_format,drug_unit,manufacturer,
-        drug_dosage,drug_type,drug_price,mnemonic_code,creation_date,delmark)
+        drug_dosage,drug_type,drug_price,mnemonic_code,creation_date)
         values(#{drugCode},#{drugName},#{drugFormat},#{drugUnit},#{manufacturer},
-        #{drugDosage},#{drugType},#{drugPrice},#{mnemonicCode},#{creationDate},1)
+        #{drugDosage},#{drugType},#{drugPrice},#{mnemonicCode},#{creationDate})
     </insert>
 
     <update id="update">
@@ -35,7 +37,15 @@
         where id=#{id}
     </update>
 
-    <update id="deleteById">
-        update drug_info set delmark=0 where id=#{id}
+    <delete id="deleteById">
+        delete from drug_info where id=#{id}
+    </delete>
+
+    <update id="stockIn">
+        update drug_info set drug_stock = drug_stock + #{qty} where id = #{id}
+    </update>
+
+    <update id="stockOut">
+        update drug_info set drug_stock = drug_stock - #{qty} where id = #{id} and drug_stock &gt;= #{qty}
     </update>
 </mapper>

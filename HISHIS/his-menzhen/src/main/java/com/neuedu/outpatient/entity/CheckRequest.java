@@ -1,6 +1,7 @@
 package com.neuedu.outpatient.entity;
 
 import java.util.Date;
+import java.math.BigDecimal;
 
 public class CheckRequest {
     private Integer id;
@@ -15,6 +16,9 @@ public class CheckRequest {
     private String checkResult;
     private String checkState;
     private String checkRemark;
+    // 联查展示字段（非表字段）：医技项目名称、单价
+    private String techName;
+    private BigDecimal techPrice;
 
     public Integer getId() {
         return id;
@@ -110,5 +114,21 @@ public class CheckRequest {
 
     public void setCheckRemark(String checkRemark) {
         this.checkRemark = checkRemark;
+    }
+
+    public String getTechName() {
+        return techName;
+    }
+
+    public void setTechName(String techName) {
+        this.techName = techName;
+    }
+
+    public BigDecimal getTechPrice() {
+        return techPrice;
+    }
+
+    public void setTechPrice(BigDecimal techPrice) {
+        this.techPrice = techPrice;
     }
 }

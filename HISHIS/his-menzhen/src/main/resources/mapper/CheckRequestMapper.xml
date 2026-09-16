@@ -14,6 +14,8 @@
         <result column="check_result" property="checkResult"/>
         <result column="check_state" property="checkState"/>
         <result column="check_remark" property="checkRemark"/>
+        <result column="tech_name" property="techName"/>
+        <result column="tech_price" property="techPrice"/>
     </resultMap>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -22,7 +24,10 @@
     </insert>
 
     <select id="selectByRegisterId" resultMap="BaseResultMap">
-        SELECT * FROM check_request WHERE register_id = #{registerId}
+        SELECT c.*, t.tech_name, t.tech_price
+        FROM check_request c
+        LEFT JOIN medical_technology t ON c.medical_technology_id = t.id
+        WHERE c.register_id = #{registerId}
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">

@@ -1,25 +1,32 @@
 <script setup>
-import { ref, reactive, nextTick, onMounted } from 'vue'
+import { ref, reactive, computed, nextTick, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Search } from '@element-plus/icons-vue'
-import {
-  getRegisterList,
-  addRegister,
-  refundRegister,
-  getDeptList,
-  getDoctorList,
-  getRegistLevelList,
-  getSettleCategoryList,
-} from '@/api/registration'
+import { getRegisterList, addRegister, updateRegisterState, getDeptList } from '@/api/registration'
 import { formatDate, formatMoney } from '@/utils/format'
 
-// 状态字典（前端写死）
+// 状态字典（后端 createRegister 默认写 0，DB 注释为 1-4，这里都覆盖）
 const visitStateMap = {
+  0: { label: '未就诊', type: 'info' },
   1: { label: '已挂号', type: 'primary' },
   2: { label: '医生接诊', type: 'warning' },
   3: { label: '看诊结束', type: 'success' },
   4: { label: '已退号', type: 'info' },
 }
+
+// 号别（后端缺 /regist-level/list，按 his数据库.sql 种子数据写死，待后端补齐后改为接口拉取）
+const registLevelOptions = [
+  { id: 1, registName: '专家号', registFee: 50 },
+  { id: 2, registName: '普通号', registFee: 8 },
+  { id: 3, registName: '主任医生号', registFee: 20 },
+]
+const registLevelNameMap = Object.fromEntries(registLevelOptions.map((l) => [l.id, l.registName]))
+
+// 结算类别（后端缺 /settle-category/list，按 DB 种子数据写死，待后端补齐）
+const settleCategoryOptions = [
+  { id: 1, settleName: '自费' },
+  { id: 2, settleName: '市医保' },
+]
 
 const genderOptions = ['男', '女']
 const ageTypeOptions = ['年', '天']
@@ -29,31 +36,23 @@ const registMethodOptions = ['现金', '银行卡', '微信', '医保卡', '支�
 
 const loading = ref(false)
 const list = ref([])
-const total = ref(0)
-const pageNum = ref(1)
-const pageSize = ref(10)
 
-// 搜索条件
+// 搜索条件（对齐后端 RegisterQueryDTO：realName / deptmentId / visitState / visitDate）
 const query = reactive({
-  caseNumber: '',
   realName: '',
   visitState: '',
   visitDate: '',
   deptmentId: '',
 })
 
-// 下拉数据源
-const deptOptions = ref([])
-const doctorOptions = ref([])
-const registLevelOptions = ref([])
-const settleCategoryOptions = ref([])
+// 科室（后端 department/list 已实现）
+const deptList = ref([])
 
 const dialogVisible = ref(false)
 const formRef = ref()
 const submitting = ref(false)
 
 const form = reactive({
-  caseNumber: '',
   realName: '',
   cardNumber: '',
   gender: '',
@@ -81,17 +80,20 @@ const rules = {
   visitDate: [{ required: true, message: '请选择看诊日期', trigger: 'change' }],
   noon: [{ required: true, message: '请选择午别', trigger: 'change' }],
   deptmentId: [{ required: true, message: '请选择挂号科室', trigger: 'change' }],
-  employeeId: [{ required: true, message: '请选择挂号医生', trigger: 'change' }],
+  employeeId: [{ required: true, message: '请填写挂号医生ID', trigger: 'change' }],
   registLevelId: [{ required: true, message: '请选择号别', trigger: 'change' }],
   settleCategoryId: [{ required: true, message: '请选择结算类别', trigger: 'change' }],
   isBook: [{ required: true, message: '请选择病历本', trigger: 'change' }],
   registMethod: [{ required: true, message: '请选择收费方式', trigger: 'change' }],
 }
 
-// 组装列表查询参数，空值不传
+// 门诊科室（挂号表单用）
+const outpatientDeptOptions = computed(() => deptList.value.filter((d) => d.deptType === '门诊'))
+// 科室 id -> 名称（列表列展示用）
+const deptNameMap = computed(() => Object.fromEntries(deptList.value.map((d) => [d.id, d.deptName])))
+
 function buildParams() {
-  const p = { pageNum: pageNum.value, pageSize: pageSize.value }
-  if (query.caseNumber) p.caseNumber = query.caseNumber
+  const p = {}
   if (query.realName) p.realName = query.realName
   if (query.visitState !== '' && query.visitState != null) p.visitState = query.visitState
   if (query.visitDate) p.visitDate = query.visitDate
@@ -103,22 +105,18 @@ async function fetchList() {
   loading.value = true
   try {
     const res = await getRegisterList(buildParams())
-    const data = res?.data || {}
-    list.value = data.list || []
-    total.value = data.total || 0
+    list.value = res?.data || []
   } finally {
     loading.value = false
   }
 }
 
 function handleSearch() {
-  pageNum.value = 1
   fetchList()
 }
 
 function handleReset() {
-  Object.assign(query, { caseNumber: '', realName: '', visitState: '', visitDate: '', deptmentId: '' })
-  pageNum.value = 1
+  Object.assign(query, { realName: '', visitState: '', visitDate: '', deptmentId: '' })
   fetchList()
 }
 
@@ -155,37 +153,24 @@ function handleBirthdayChange() {
 
 // 选号别 → 自动带出挂号费
 function handleLevelChange(levelId) {
-  const level = registLevelOptions.value.find((l) => l.id === levelId)
+  const level = registLevelOptions.find((l) => l.id === levelId)
   form.registMoney = level ? level.registFee : null
 }
 
-// 选科室 → 拉取该科室医生
-async function handleDeptChange(deptmentId) {
-  doctorOptions.value = []
-  form.employeeId = null
-  if (!deptmentId) return
-  const res = await getDoctorList(deptmentId)
-  doctorOptions.value = res?.data || []
+// 后端 RegisterDTO.visitDate 为 yyyy-MM-dd HH:mm:ss，前端只收日期 + 午别，这里拼完整时间
+function composeVisitDate() {
+  if (!form.visitDate) return ''
+  const time = form.noon === '上午' ? '08:00:00' : '14:00:00'
+  return `${form.visitDate} ${time}`
 }
 
 async function fetchDeptOptions() {
   const res = await getDeptList()
-  deptOptions.value = (res?.data || []).filter((d) => d.deptType === '门诊')
-}
-
-async function fetchRegistLevelOptions() {
-  const res = await getRegistLevelList()
-  registLevelOptions.value = res?.data || []
-}
-
-async function fetchSettleCategoryOptions() {
-  const res = await getSettleCategoryList()
-  settleCategoryOptions.value = res?.data || []
+  deptList.value = res?.data || []
 }
 
 function openAdd() {
   Object.assign(form, {
-    caseNumber: '',
     realName: '',
     cardNumber: '',
     gender: '',
@@ -203,7 +188,6 @@ function openAdd() {
     registMethod: '',
     registMoney: null,
   })
-  doctorOptions.value = []
   dialogVisible.value = true
   nextTick(() => formRef.value?.clearValidate())
 }
@@ -213,7 +197,6 @@ async function handleSubmit() {
   submitting.value = true
   try {
     await addRegister({
-      caseNumber: form.caseNumber,
       realName: form.realName,
       cardNumber: form.cardNumber,
       gender: form.gender,
@@ -221,7 +204,7 @@ async function handleSubmit() {
       age: form.age,
       ageType: form.ageType,
       homeAddress: form.homeAddress,
-      visitDate: form.visitDate,
+      visitDate: composeVisitDate(),
       noon: form.noon,
       deptmentId: form.deptmentId,
       employeeId: form.employeeId,
@@ -230,7 +213,6 @@ async function handleSubmit() {
       isBook: form.isBook,
       registMethod: form.registMethod,
       registMoney: form.registMoney,
-      visitState: 1,
     })
     ElMessage.success('挂号成功')
     dialogVisible.value = false
@@ -248,7 +230,7 @@ async function handleRefund(row) {
     '退号确认',
     { confirmButtonText: '确定退号', cancelButtonText: '取消', type: 'warning' },
   )
-  await refundRegister(row.id)
+  await updateRegisterState(row.id, 4)
   ElMessage.success('退号成功')
   fetchList()
 }
@@ -256,8 +238,6 @@ async function handleRefund(row) {
 onMounted(() => {
   fetchList()
   fetchDeptOptions()
-  fetchRegistLevelOptions()
-  fetchSettleCategoryOptions()
 })
 </script>
 
@@ -266,9 +246,6 @@ onMounted(() => {
     <el-card>
       <div class="toolbar">
         <el-form :inline="true" :model="query" class="search-form">
-          <el-form-item label="病历号">
-            <el-input v-model="query.caseNumber" placeholder="病历号" clearable />
-          </el-form-item>
           <el-form-item label="姓名">
             <el-input v-model="query.realName" placeholder="姓名" clearable />
           </el-form-item>
@@ -293,7 +270,7 @@ onMounted(() => {
           </el-form-item>
           <el-form-item label="科室">
             <el-select v-model="query.deptmentId" placeholder="全部" clearable filterable class="w160">
-              <el-option v-for="d in deptOptions" :key="d.id" :label="d.deptName" :value="d.id" />
+              <el-option v-for="d in deptList" :key="d.id" :label="d.deptName" :value="d.id" />
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -309,7 +286,7 @@ onMounted(() => {
       </div>
 
       <el-table v-loading="loading" :data="list" border stripe>
-        <el-table-column prop="caseNumber" label="病历号" width="110" />
+        <el-table-column prop="caseNumber" label="病历号" width="140" />
         <el-table-column prop="realName" label="姓名" width="90" />
         <el-table-column prop="gender" label="性别" width="60" />
         <el-table-column label="年龄" width="80">
@@ -318,9 +295,15 @@ onMounted(() => {
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="deptName" label="科室" min-width="130" />
-        <el-table-column prop="doctorName" label="医生" width="90" />
-        <el-table-column prop="registLevelName" label="号别" width="90" />
+        <el-table-column label="科室" min-width="130">
+          <template #default="{ row }">{{ deptNameMap[row.deptmentId] || row.deptmentId }}</template>
+        </el-table-column>
+        <el-table-column prop="employeeId" label="医生ID" width="80" />
+        <el-table-column label="号别" width="100">
+          <template #default="{ row }">
+            {{ registLevelNameMap[row.registLevelId] || row.registLevelId }}
+          </template>
+        </el-table-column>
         <el-table-column label="看诊时间" width="180">
           <template #default="{ row }">
             {{ formatDate(row.visitDate, 'YYYY-MM-DD HH:mm') }} {{ row.noon }}
@@ -338,24 +321,17 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="操作" width="90" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="row.visitState === 1" link type="danger" @click="handleRefund(row)">
+            <el-button
+              v-if="row.visitState === 0 || row.visitState === 1"
+              link
+              type="danger"
+              @click="handleRefund(row)"
+            >
               退号
             </el-button>
           </template>
         </el-table-column>
       </el-table>
-
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="pageNum"
-          v-model:page-size="pageSize"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchList"
-          @current-change="fetchList"
-        />
-      </div>
     </el-card>
 
     <el-dialog
@@ -367,11 +343,6 @@ onMounted(() => {
       <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
         <div class="form-section">患者信息</div>
         <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="病历号" prop="caseNumber">
-              <el-input v-model="form.caseNumber" placeholder="留空自动生成" clearable />
-            </el-form-item>
-          </el-col>
           <el-col :span="8">
             <el-form-item label="姓名" prop="realName">
               <el-input v-model="form.realName" placeholder="请输入姓名" />
@@ -453,33 +424,25 @@ onMounted(() => {
           </el-col>
           <el-col :span="8">
             <el-form-item label="挂号科室" prop="deptmentId">
-              <el-select
-                v-model="form.deptmentId"
-                placeholder="请选择科室"
-                filterable
-                style="width: 100%"
-                @change="handleDeptChange"
-              >
-                <el-option v-for="d in deptOptions" :key="d.id" :label="d.deptName" :value="d.id" />
+              <el-select v-model="form.deptmentId" placeholder="请选择科室" filterable style="width: 100%">
+                <el-option
+                  v-for="d in outpatientDeptOptions"
+                  :key="d.id"
+                  :label="d.deptName"
+                  :value="d.id"
+                />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="挂号医生" prop="employeeId">
-              <el-select
+              <el-input-number
                 v-model="form.employeeId"
-                placeholder="请选择医生"
-                filterable
+                :min="1"
+                controls-position="right"
+                placeholder="医生ID"
                 style="width: 100%"
-                :disabled="!form.deptmentId"
-              >
-                <el-option
-                  v-for="d in doctorOptions"
-                  :key="d.id"
-                  :label="d.realname"
-                  :value="d.id"
-                />
-              </el-select>
+              />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -493,7 +456,7 @@ onMounted(() => {
                 <el-option
                   v-for="l in registLevelOptions"
                   :key="l.id"
-                  :label="l.registName"
+                  :label="`${l.registName}（¥${l.registFee}）`"
                   :value="l.id"
                 />
               </el-select>
@@ -525,12 +488,7 @@ onMounted(() => {
           <el-col :span="8">
             <el-form-item label="收费方式" prop="registMethod">
               <el-select v-model="form.registMethod" placeholder="请选择" style="width: 100%">
-                <el-option
-                  v-for="m in registMethodOptions"
-                  :key="m"
-                  :label="m"
-                  :value="m"
-                />
+                <el-option v-for="m in registMethodOptions" :key="m" :label="m" :value="m" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -587,11 +545,5 @@ onMounted(() => {
   border-left: 3px solid var(--el-color-primary);
   font-weight: 600;
   color: var(--el-text-color-primary);
-}
-
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
 }
 </style>

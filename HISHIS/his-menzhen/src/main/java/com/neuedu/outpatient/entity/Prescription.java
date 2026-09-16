@@ -11,6 +11,11 @@ public class Prescription {
     private Integer drugNumber;
     private Date creationTime;
     private String drugState;
+    // 联查展示字段（非表字段）：药品名称/规格/单位/单价
+    private String drugName;
+    private String drugFormat;
+    private String drugUnit;
+    private BigDecimal drugPrice;
 
     public Integer getId() {
         return id;
@@ -66,5 +71,37 @@ public class Prescription {
 
     public void setDrugState(String drugState) {
         this.drugState = drugState;
+    }
+
+    public String getDrugName() {
+        return drugName;
+    }
+
+    public void setDrugName(String drugName) {
+        this.drugName = drugName;
+    }
+
+    public String getDrugFormat() {
+        return drugFormat;
+    }
+
+    public void setDrugFormat(String drugFormat) {
+        this.drugFormat = drugFormat;
+    }
+
+    public String getDrugUnit() {
+        return drugUnit;
+    }
+
+    public void setDrugUnit(String drugUnit) {
+        this.drugUnit = drugUnit;
+    }
+
+    public BigDecimal getDrugPrice() {
+        return drugPrice;
+    }
+
+    public void setDrugPrice(BigDecimal drugPrice) {
+        this.drugPrice = drugPrice;
     }
 }

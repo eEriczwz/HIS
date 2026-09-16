@@ -17,4 +17,10 @@ public interface DrugInfoMapper {
 
     //逻辑删除，修改delmark=0
     int deleteById(Integer id);
+
+    //入库：库存增加
+    int stockIn(@Param("id") Integer id, @Param("qty") Integer qty);
+
+    //出库：库存减少（库存不足时返回0）
+    int stockOut(@Param("id") Integer id, @Param("qty") Integer qty);
 }

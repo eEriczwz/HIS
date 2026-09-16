@@ -9,4 +9,11 @@
         where realname = #{realname}
     </select>
 
+    <select id="selectAll" resultType="com.neuedu.employee.entity.Employee">
+        select id,realname,deptment_id,regist_level_id,scheduling_id,delmark
+        from employee
+        where delmark = 1
+        order by id
+    </select>
+
 </mapper>

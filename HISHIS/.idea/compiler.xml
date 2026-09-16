@@ -2,21 +2,24 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="his-common" />
         <module name="his-menzhen" />
-        <module name="his-employee" />
         <module name="his-outpatient" />
-        <module name="his-registration" />
+        <module name="his-charge" />
         <module name="his-drugstore" />
+        <module name="his-employee" />
+        <module name="his-registration" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="his-charge" options="-parameters" />
       <module name="his-common" options="-parameters" />
       <module name="his-drugstore" options="-parameters" />
       <module name="his-employee" options="-parameters" />

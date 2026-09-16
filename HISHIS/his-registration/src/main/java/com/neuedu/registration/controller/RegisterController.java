@@ -44,7 +44,7 @@ public class RegisterController {
 
     /**
      * 修改就诊状态
-     * 0未就诊，1已就诊，2取消挂号
+     * 1已挂号，2医生接诊，3看诊结束，4已退号
      */
     @PutMapping("/state/{id}/{state}")
     public Result<?> updateState(@PathVariable Integer id,@PathVariable Integer state){

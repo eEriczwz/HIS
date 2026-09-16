@@ -1,36 +1,21 @@
 import request from './request'
 
-// 挂号记录分页查询
+// 挂号记录查询（后端当前无分页、无 JOIN，直接返回数组）
 export function getRegisterList(params) {
   return request.get('/register/list', { params })
 }
 
-// 新增挂号
+// 新增挂号（病历号后端自动生成，body 无需传 caseNumber）
 export function addRegister(data) {
   return request.post('/register/add', data)
 }
 
-// 退号（visit_state → 4）
-export function refundRegister(id) {
-  return request.put(`/register/refund/${id}`)
+// 修改就诊状态（退号 = 传 visitState 4）
+export function updateRegisterState(id, state) {
+  return request.put(`/register/state/${id}/${state}`)
 }
 
-// 科室下拉（复用已实现的 department 接口，前端过滤 deptType=门诊）
+// 科室下拉（复用已实现的 department 接口）
 export function getDeptList() {
   return request.get('/department/list')
-}
-
-// 某科室下的医生下拉
-export function getDoctorList(deptmentId) {
-  return request.get('/employee/list', { params: { deptmentId } })
-}
-
-// 号别下拉（专家/普通/主任）
-export function getRegistLevelList() {
-  return request.get('/regist-level/list')
-}
-
-// 结算类别下拉（自费/市医保）
-export function getSettleCategoryList() {
-  return request.get('/settle-category/list')
 }

@@ -9,4 +9,6 @@ public interface DiseaseMapper {
     List<Disease> selectByMedicalRecordId(@Param("medicalRecordId") Integer medicalRecordId);
     //根据id批量查询疾病
     List<Disease> selectByIds(@Param("ids") List<Integer> ids);
+    //按名称/编码/ICD 模糊查询疾病（诊断多选下拉）
+    List<Disease> selectByKeyword(@Param("keyword") String keyword);
 }

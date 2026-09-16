@@ -32,4 +32,14 @@ public class DrugInfoServiceImpl implements DrugInfoService {
     public int deleteById(Integer id) {
         return drugInfoMapper.deleteById(id);
     }
+
+    @Override
+    public int stockIn(Integer id, Integer qty) {
+        return drugInfoMapper.stockIn(id, qty);
+    }
+
+    @Override
+    public int stockOut(Integer id, Integer qty) {
+        return drugInfoMapper.stockOut(id, qty);
+    }
 }

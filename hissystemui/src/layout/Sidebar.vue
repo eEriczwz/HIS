@@ -29,7 +29,7 @@ function resolvePath(base, path) {
 <template>
   <div class="sidebar">
     <div class="sidebar-logo">
-      <span v-if="!collapsed">HIS 信息管理系统</span>
+      <span v-if="!collapsed">长沙市中心人民信息管理系统</span>
       <span v-else>HIS</span>
     </div>
     <el-scrollbar class="sidebar-scroll">

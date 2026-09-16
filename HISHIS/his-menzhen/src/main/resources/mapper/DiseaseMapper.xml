@@ -22,4 +22,18 @@
             #{id}
         </foreach>
     </select>
+
+    <!-- 按名称/编码/ICD 模糊查询疾病，用于诊断多选下拉 -->
+    <select id="selectByKeyword" resultMap="BaseResultMap">
+        SELECT * FROM disease
+        <where>
+            <if test="keyword != null and keyword != ''">
+                disease_name LIKE CONCAT('%', #{keyword}, '%')
+                OR disease_code LIKE CONCAT('%', #{keyword}, '%')
+                OR diseaseICD LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY id
+        LIMIT 50
+    </select>
 </mapper>

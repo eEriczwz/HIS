@@ -16,6 +16,7 @@ public class DrugInfo {
     private String mnemonicCode;
     private Date creationDate;
     private Integer delmark;
+    private Integer drugStock;
 
     //无参、全参构造
     public DrugInfo(){}
@@ -45,4 +46,6 @@ public class DrugInfo {
     public void setCreationDate(Date creationDate) { this.creationDate = creationDate; }
     public Integer getDelmark() { return delmark; }
     public void setDelmark(Integer delmark) { this.delmark = delmark; }
+    public Integer getDrugStock() { return drugStock; }
+    public void setDrugStock(Integer drugStock) { this.drugStock = drugStock; }
 }
