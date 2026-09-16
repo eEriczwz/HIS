@@ -15,6 +15,7 @@
         <module>his-drugstore</module>
         <module>his-registration</module>
         <module>his-employee</module>
+        <module>his-menzhen</module>
     </modules>
 
     <parent>

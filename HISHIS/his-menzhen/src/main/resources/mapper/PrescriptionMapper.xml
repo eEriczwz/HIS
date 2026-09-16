@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.outpatient.mapper.PrescriptionMapper">
+    <resultMap id="BaseResultMap" type="com.neuedu.outpatient.entity.Prescription">
+        <id column="id" property="id"/>
+        <result column="register_id" property="registerId"/>
+        <result column="drug_id" property="drugId"/>
+        <result column="drug_usage" property="drugUsage"/>
+        <result column="drug_number" property="drugNumber"/>
+        <result column="creation_time" property="creationTime"/>
+        <result column="drug_state" property="drugState"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO prescription(register_id,drug_id,drug_usage,drug_number,creation_time,drug_state)
+        VALUES(#{registerId},#{drugId},#{drugUsage},#{drugNumber},#{creationTime},#{drugState})
+    </insert>
+
+    <select id="selectByRegisterId" resultMap="BaseResultMap">
+        SELECT * FROM prescription WHERE register_id = #{registerId}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM prescription WHERE id = #{id}
+    </select>
+</mapper>

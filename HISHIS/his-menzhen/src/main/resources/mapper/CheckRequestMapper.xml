@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.outpatient.mapper.CheckRequestMapper">
+    <resultMap id="BaseResultMap" type="com.neuedu.outpatient.entity.CheckRequest">
+        <id column="id" property="id"/>
+        <result column="register_id" property="registerId"/>
+        <result column="medical_technology_id" property="medicalTechnologyId"/>
+        <result column="check_info" property="checkInfo"/>
+        <result column="check_position" property="checkPosition"/>
+        <result column="creation_time" property="creationTime"/>
+        <result column="check_employee_id" property="checkEmployeeId"/>
+        <result column="inputcheck_employee_id" property="inputcheckEmployeeId"/>
+        <result column="check_time" property="checkTime"/>
+        <result column="check_result" property="checkResult"/>
+        <result column="check_state" property="checkState"/>
+        <result column="check_remark" property="checkRemark"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO check_request(register_id,medical_technology_id,check_info,check_position,creation_time,check_employee_id,inputcheck_employee_id,check_time,check_result,check_state,check_remark)
+        VALUES(#{registerId},#{medicalTechnologyId},#{checkInfo},#{checkPosition},#{creationTime},#{checkEmployeeId},#{inputcheckEmployeeId},#{checkTime},#{checkResult},#{checkState},#{checkRemark})
+    </insert>
+
+    <select id="selectByRegisterId" resultMap="BaseResultMap">
+        SELECT * FROM check_request WHERE register_id = #{registerId}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM check_request WHERE id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neuedu.outpatient.mapper.RegisterMapper">
+    <resultMap id="BaseResultMap" type="com.neuedu.outpatient.entity.Register">
+        <id column="id" property="id"/>
+        <result column="case_number" property="caseNumber"/>
+        <result column="real_name" property="realName"/>
+        <result column="gender" property="gender"/>
+        <result column="card_number" property="cardNumber"/>
+        <result column="birthday" property="birthday"/>
+        <result column="age" property="age"/>
+        <result column="age_type" property="ageType"/>
+        <result column="home_address" property="homeAddress"/>
+        <result column="visit_date" property="visitDate"/>
+        <result column="noon" property="noon"/>
+        <result column="deptment_id" property="deptmentId"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="regist_level_id" property="registLevelId"/>
+        <result column="settle_category_id" property="settleCategoryId"/>
+        <result column="is_book" property="isBook"/>
+        <result column="regist_method" property="registMethod"/>
+        <result column="visit_state" property="visitState"/>
+        <result column="regist_money" property="registMoney"/>
+    </resultMap>
+
+    <select id="selectWaitPatientByDoctorId" resultMap="BaseResultMap">
+        SELECT * FROM register WHERE employee_id = #{employeeId} AND visit_state = 1
+    </select>
+
+    <update id="updateVisitState">
+        UPDATE register SET visit_state = #{visitState} WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM register WHERE id = #{id}
+    </select>
+</mapper>
